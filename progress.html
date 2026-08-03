@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RigHub – Category Completion Progress</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <!-- Google Fonts: Inter & Orbitron -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@700;900&display=swap"
+    rel="stylesheet" />
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            orbitron: ['Orbitron', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .progress-ring-circle {
+      transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #3b82f640;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen text-slate-100 selection:bg-cyan-500 selection:text-white relative overflow-x-hidden"
+  style="background: #070913;">
+
+  <!-- Header Navigation -->
+  <header class="glass-panel sticky top-0 z-40 border-b border-slate-800/80 bg-slate-950/90 px-6 py-3.5">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <img src="logo.png" alt="Logo" class="h-10">
+        <div>
+          <h1 class="font-orbitron text-lg font-black text-white tracking-wide flex items-center gap-2">
+            RIG HUB <span
+              class="text-xs px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-sans border border-emerald-500/30">Completion
+              Progress</span>
+          </h1>
+          <p class="text-[11px] text-slate-400">Live tracker & synchronized analytics for product categories</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a href="index2.html"
+          class="px-3.5 py-2 rounded-xl text-xs font-bold text-cyan-300 hover:text-white bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 transition-all flex items-center gap-2 shadow-lg shadow-cyan-500/10">
+          🛠️ Open Category Manager
+        </a>
+        <a href="index.html"
+          class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white bg-slate-800/60 hover:bg-slate-800 transition-all border border-slate-700/50 flex items-center gap-1.5">
+          🌐 Aggregator Site
+        </a>
+        <button id="refresh-btn"
+          class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-200 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all flex items-center gap-1">
+          🔄 Live Refresh
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto p-4 md:p-6 flex flex-col gap-6">
+
+    <!-- Hero Circular Progress Section -->
+    <div
+      class="glass-panel p-8 rounded-3xl border border-slate-800 flex flex-col md:flex-row items-center justify-around gap-8 relative overflow-hidden">
+      <!-- Glow Accents -->
+      <div class="absolute -top-32 -left-32 w-64 h-64 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none">
+      </div>
+      <div class="absolute -bottom-32 -right-32 w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none">
+      </div>
+
+      <!-- Circular Progress Ring Container -->
+      <div class="relative flex items-center justify-center">
+        <svg class="w-64 h-64 md:w-72 md:h-72">
+          <!-- Background Track Circle -->
+          <circle cx="50%" cy="50%" r="110" stroke="currentColor" stroke-width="18" class="text-slate-800/80"
+            fill="transparent" />
+          <!-- Animated Progress Circle -->
+          <circle id="progress-circle" cx="50%" cy="50%" r="110" stroke="url(#gradient)" stroke-width="18"
+            stroke-linecap="round" class="progress-ring-circle" fill="transparent" stroke-dasharray="691.15"
+            stroke-dashoffset="691.15" />
+          <defs>
+            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#06b6d4" />
+              <stop offset="50%" stop-color="#10b981" />
+              <stop offset="100%" stop-color="#6366f1" />
+            </linearGradient>
+          </defs>
+        </svg>
+
+        <!-- Center Percentage & Count -->
+        <div class="absolute flex flex-col items-center justify-center text-center p-4">
+          <span id="center-percent"
+            class="font-orbitron text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-emerald-300 to-indigo-400 tracking-tight">
+            0%
+          </span>
+          <span class="text-xs uppercase font-bold tracking-widest text-slate-400 mt-1">COMPLETED</span>
+          <span id="center-ratio"
+            class="text-xs text-slate-400 font-medium mt-1 bg-slate-900/80 px-2.5 py-1 rounded-full border border-slate-800">
+            0 / 0 Items
+          </span>
+        </div>
+      </div>
+
+      <!-- Live Summary Metric Cards (Interactive Links to Manager Tabs) -->
+      <div class="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+        <!-- Total Products Card -->
+        <a href="index2.html?tab=all" title="View all products in Manager"
+          class="glass-panel p-5 rounded-2xl border border-slate-800/90 hover:border-cyan-500/50 transition-all flex flex-col gap-1 group cursor-pointer">
+          <div
+            class="flex items-center justify-between text-slate-400 text-xs font-bold uppercase tracking-wider group-hover:text-cyan-300">
+            <span>Total Products</span>
+            <span class="text-slate-500 group-hover:scale-110 transition-transform">📦</span>
+          </div>
+          <div id="stat-total" class="text-3xl font-black text-white font-orbitron mt-1">0</div>
+          <p class="text-[11px] text-slate-500">All scraped items across all stores ↗</p>
+        </a>
+
+        <!-- DONE Card -->
+        <a href="index2.html?tab=done" title="View DONE products in Manager"
+          class="glass-panel p-5 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 hover:border-emerald-500/60 transition-all flex flex-col gap-1 group cursor-pointer">
+          <div
+            class="flex items-center justify-between text-emerald-400 text-xs font-bold uppercase tracking-wider group-hover:text-emerald-300">
+            <span>DONE (Categorized)</span>
+            <span class="text-emerald-400 group-hover:scale-110 transition-transform">✅</span>
+          </div>
+          <div id="stat-done" class="text-3xl font-black text-emerald-400 font-orbitron mt-1">0</div>
+          <p class="text-[11px] text-emerald-400/70">Main Category & Subcategory assigned ↗</p>
+        </a>
+
+        <!-- Uncategorized Card -->
+        <a href="index2.html?tab=uncategorized" title="View Uncategorized products in Manager"
+          class="glass-panel p-5 rounded-2xl border border-amber-500/20 bg-amber-500/5 hover:border-amber-500/60 transition-all flex flex-col gap-1 group cursor-pointer">
+          <div
+            class="flex items-center justify-between text-amber-400 text-xs font-bold uppercase tracking-wider group-hover:text-amber-300">
+            <span>unCategoryzed</span>
+            <span class="text-amber-400 group-hover:scale-110 transition-transform">⚠️</span>
+          </div>
+          <div id="stat-uncategorized" class="text-3xl font-black text-amber-400 font-orbitron mt-1">0</div>
+          <p class="text-[11px] text-amber-400/70">Pending main category or subcategory ↗</p>
+        </a>
+
+        <!-- Completion Rate Card -->
+        <div class="glass-panel p-5 rounded-2xl border border-cyan-500/20 bg-cyan-500/5 flex flex-col gap-1">
+          <div class="flex items-center justify-between text-cyan-400 text-xs font-bold uppercase tracking-wider">
+            <span>Completion Rate</span>
+            <span class="text-cyan-400">📈</span>
+          </div>
+          <div id="stat-rate" class="text-3xl font-black text-cyan-300 font-orbitron mt-1">0.0%</div>
+          <p class="text-[11px] text-cyan-400/70">Percentage of master catalog processed</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Store Breakdown Table -->
+    <div class="glass-panel rounded-2xl border border-slate-800 p-6 flex flex-col gap-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="font-orbitron text-base font-bold text-white tracking-wide">Store Breakdown</h2>
+          <p class="text-xs text-slate-400">Category completion statistics by store (Click store to manage)</p>
+        </div>
+        <span id="store-count-badge"
+          class="text-xs font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-3 py-1 rounded-full">
+          0 Stores
+        </span>
+      </div>
+
+      <div class="overflow-x-auto custom-scrollbar">
+        <table class="w-full text-left text-xs text-slate-300">
+          <thead
+            class="bg-slate-900/90 uppercase text-[10px] font-bold tracking-wider text-slate-400 border-b border-slate-800">
+            <tr>
+              <th class="p-3">Store Name</th>
+              <th class="p-3 text-center">Total Products</th>
+              <th class="p-3 text-center text-emerald-400">DONE</th>
+              <th class="p-3 text-center text-amber-400">unCategoryzed</th>
+              <th class="p-3 w-48">Progress</th>
+              <th class="p-3 text-right">Completion %</th>
+            </tr>
+          </thead>
+          <tbody id="store-rows" class="divide-y divide-slate-800/60">
+            <!-- Dynamic Store Rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Load products.js data as automatic offline/static fallback -->
+  <script src="products.js"></script>
+
+  <!-- JavaScript -->
+  <script>
+    let authToken = sessionStorage.getItem("admin_token") || "admin-session-3mk";
+
+    const progressCircle = document.getElementById("progress-circle");
+    const centerPercent = document.getElementById("center-percent");
+    const centerRatio = document.getElementById("center-ratio");
+
+    const statTotal = document.getElementById("stat-total");
+    const statDone = document.getElementById("stat-done");
+    const statUncategorized = document.getElementById("stat-uncategorized");
+    const statRate = document.getElementById("stat-rate");
+
+    const storeRows = document.getElementById("store-rows");
+    const storeCountBadge = document.getElementById("store-count-badge");
+    const refreshBtn = document.getElementById("refresh-btn");
+
+    const radius = 110;
+    const circumference = 2 * Math.PI * radius; // ~691.15
+
+    // Inter-tab live synchronization via BroadcastChannel & Storage Event
+    const categoryChannel = new BroadcastChannel("righub_category_updates");
+    categoryChannel.onmessage = (event) => {
+      if (event.data && event.data.type === "CATEGORIES_UPDATED") {
+        fetchProgressData();
+      }
+    };
+    window.addEventListener("storage", (e) => {
+      if (e.key === "righub_last_update") {
+        fetchProgressData();
+      }
+    });
+    window.addEventListener("focus", fetchProgressData);
+
+    window.addEventListener("DOMContentLoaded", () => {
+      fetchProgressData();
+      // Auto refresh every 5 seconds for real-time tracking
+      setInterval(fetchProgressData, 5000);
+    });
+
+    refreshBtn.addEventListener("click", fetchProgressData);
+
+    async function fetchProgressData() {
+      try {
+        refreshBtn.classList.add("opacity-50", "pointer-events-none");
+        const res = await fetch(`/api/products?token=${encodeURIComponent(authToken)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && Array.isArray(data.products) && data.products.length > 0) {
+            calculateAndRender(data.products);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn("API fetch un-reachable, using local PRODUCTS_DATA fallback", err);
+      } finally {
+        refreshBtn.classList.remove("opacity-50", "pointer-events-none");
+      }
+
+      // Fallback to window.PRODUCTS_DATA if API fails or returns 0
+      if (window.PRODUCTS_DATA && Array.isArray(window.PRODUCTS_DATA)) {
+        let prods = window.PRODUCTS_DATA;
+        if (prods.length > 0 && Array.isArray(prods[0])) {
+          prods = prods.map(p => ({
+            id: p[0],
+            name: p[1],
+            category1: window.CATEGORIES && typeof p[2] === 'number' ? window.CATEGORIES[p[2]] : (p[2] || ''),
+            parentCategory1: '',
+            store: window.STORES && typeof p[7] === 'number' ? window.STORES[p[7]] : (p[7] || ''),
+            storeKey: window.STORE_KEYS && typeof p[7] === 'number' ? window.STORE_KEYS[p[7]] : (p[7] || '')
+          }));
+        }
+        calculateAndRender(prods);
+      }
+    }
+
+    function calculateAndRender(products) {
+      const total = products.length;
+      let done = 0;
+      let uncategorized = 0;
+
+      const storeStats = {};
+
+      products.forEach(p => {
+        const store = p.store || "Unknown Store";
+        if (!storeStats[store]) {
+          storeStats[store] = { total: 0, done: 0, uncategorized: 0 };
+        }
+        storeStats[store].total++;
+
+        const pcat = (p.parentCategory1 || "").trim();
+        const cat = (p.category1 || "").trim();
+
+        const isPcatInvalid = !pcat || pcat === "None" || pcat === "Unassigned" || pcat.toUpperCase() === "NULL";
+        const isCatInvalid = !cat || cat === "None" || cat === "Unassigned" || cat.toUpperCase() === "NULL";
+
+        const isDone = !isPcatInvalid && !isCatInvalid;
+
+        if (isDone) {
+          done++;
+          storeStats[store].done++;
+        } else {
+          uncategorized++;
+          storeStats[store].uncategorized++;
+        }
+      });
+
+      const percentage = total > 0 ? (done / total) * 100 : 0;
+
+      // Update Circle
+      const offset = circumference - (percentage / 100) * circumference;
+      progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+      progressCircle.style.strokeDashoffset = offset;
+
+      // Update Center Text
+      centerPercent.textContent = `${percentage.toFixed(1)}%`;
+      centerRatio.textContent = `${done.toLocaleString()} / ${total.toLocaleString()} Items`;
+
+      // Update Stat Cards
+      statTotal.textContent = total.toLocaleString();
+      statDone.textContent = done.toLocaleString();
+      statUncategorized.textContent = uncategorized.toLocaleString();
+      statRate.textContent = `${percentage.toFixed(2)}%`;
+
+      // Render Store Table
+      renderStoreTable(storeStats);
+    }
+
+    function renderStoreTable(storeStats) {
+      const stores = Object.keys(storeStats).sort();
+      storeCountBadge.textContent = `${stores.length} Stores`;
+      storeRows.innerHTML = "";
+
+      const fragment = document.createDocumentFragment();
+
+      stores.forEach(s => {
+        const st = storeStats[s];
+        const pct = st.total > 0 ? (st.done / st.total) * 100 : 0;
+
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-800/40 transition-colors";
+
+        tr.innerHTML = `
+          <td class="p-3 font-semibold text-white">
+            <a href="index2.html?store=${encodeURIComponent(s)}" class="hover:text-cyan-300 transition-colors flex items-center gap-1">
+              ${escHtml(s)} <span class="text-[10px] text-slate-500">↗</span>
+            </a>
+          </td>
+          <td class="p-3 text-center font-bold text-slate-300">
+            <a href="index2.html?store=${encodeURIComponent(s)}&tab=all" class="hover:underline">${st.total.toLocaleString()}</a>
+          </td>
+          <td class="p-3 text-center font-bold text-emerald-400">
+            <a href="index2.html?store=${encodeURIComponent(s)}&tab=done" class="hover:underline">${st.done.toLocaleString()}</a>
+          </td>
+          <td class="p-3 text-center font-bold text-amber-400">
+            <a href="index2.html?store=${encodeURIComponent(s)}&tab=uncategorized" class="hover:underline">${st.uncategorized.toLocaleString()}</a>
+          </td>
+          <td class="p-3">
+            <div class="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-800">
+              <div class="bg-gradient-to-r from-cyan-500 to-emerald-400 h-full rounded-full transition-all duration-500" style="width: ${pct}%"></div>
+            </div>
+          </td>
+          <td class="p-3 text-right font-extrabold text-cyan-300">${pct.toFixed(1)}%</td>
+        `;
+        fragment.appendChild(tr);
+      });
+
+      storeRows.appendChild(fragment);
+    }
+
+    function escHtml(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+  </script>
+</body>
+
+</html>
